@@ -1,4 +1,4 @@
-function mean = mouseBehaviorAnalysis(filename)
+function finalValue = mouseBehaviorAnalysis(filename)
     VideoSize = [432 528];
     
     scale = 1/9.75; % centimeter/pixel
@@ -79,5 +79,5 @@ function mean = mouseBehaviorAnalysis(filename)
     
     release(videoPlayer);
     meanVelocity = mean(velocityTotal);
-    mean = meanVelocity;
+    finalValue = meanVelocity;
 end
