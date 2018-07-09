@@ -11,7 +11,11 @@ function runAllVideos()
 end
 
 function analyze(database, name)
+    fileID = fopen([name '.txt'],'w');
     for i = 1:1:length(database)
-        mouseBehaviorAnalysis([database(i).folder, '/', database(i).name], name);
-   end
+        fprintf(fileID, [database(i).name ': ']);
+        meanVelocity = mouseBehaviorAnalysis([database(i).folder, '/', database(i).name]);
+        fprintf(fileID, '%f', meanVelocity);
+    end
+    fclose(fileID);
 end

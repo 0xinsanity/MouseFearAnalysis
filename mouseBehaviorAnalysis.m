@@ -1,4 +1,4 @@
-function mouseBehaviorAnalysis(filename, writingtextname)
+function mean = mouseBehaviorAnalysis(filename)
     VideoSize = [432 528];
     
     scale = 1/9.75; % centimeter/pixel
@@ -76,12 +76,8 @@ function mouseBehaviorAnalysis(filename, writingtextname)
     end
 
     velocityTotal = velocityTotal(velocityTotal ~= 0);
-    meanVelocity = mean(velocityTotal);
-    
-    fileID = fopen([writingtextname '.txt'],'w');
-    fprintf(fileID, [filename ': ']);
-    fprintf(fileID, '%f', meanVelocity);
-    fclose(fileID);
     
     release(videoPlayer);
+    meanVelocity = mean(velocityTotal);
+    mean = meanVelocity;
 end
