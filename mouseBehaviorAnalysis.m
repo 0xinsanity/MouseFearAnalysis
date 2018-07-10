@@ -1,35 +1,51 @@
-function finalValue = mouseBehaviorAnalysis(filename)
-    VideoSize = [432 528];
+function finalValue = mouseBehaviorAnalysis(filename, frame_start, frame_end)
+    VideoSize = [210 300];
     
     scale = 1/9.75; % centimeter/pixel
     frameRate = 3.75; % frame/second
 
     videoReader = vision.VideoFileReader(filename);
     videoPlayer = vision.VideoPlayer('Position',[200,200,500,400]);
-    foregroundDetector = vision.ForegroundDetector('NumTrainingFrames', 1000, ...
+    foregroundDetector = vision.ForegroundDetector('NumTrainingFrames', 500, ...
                     'InitialVariance', 0.05);
     blobAnalyzer = vision.BlobAnalysis('AreaOutputPort', false, ...
                     'MinimumBlobArea', 70);
                 
     kalmanFilter = []; isTrackInitialized = false;
-    oldPoints = [];
     velocityLabel = 0; velocityTotal = [];
-    while ~isDone(videoReader)
+    
+    center = [105 150];
+    oldPoints = [];
+    
+    for i=1:1:frame_start
+        step(videoReader);
+    end
+    
+    for i=frame_start:1:frame_end
+        detectedLocationPoint = [0 0];
+        
         colorImage = step(videoReader);
         bw_file = rgb2gray(colorImage);
-        background = imopen(bw_file,strel('disk',15));
+        
+        background_img = imread('Video/accuratebackground.png'); 
+        background_img = rgb2gray(background_img);
 
+        % get background approximation of surface (lighting and stuff)
+        background = imopen(bw_file,strel('disk',35));
+
+        % Display the Background Approximation as a Surface
         ax = gca;
         ax.YDir = 'reverse';
 
-        % Remove Background Approximation and increase contrast
+        % Remove Background Approximation
         bw2 = bw_file - background;
-
+        
         foregroundMask = foregroundDetector(bw2);
         foregroundMask = bwareaopen(foregroundMask, 15);
         foregroundMask = imfill(foregroundMask, 'holes');
         
         detectedLocation = step(blobAnalyzer,foregroundMask); % [x,y]
+        
         isObjectDetected = size(detectedLocation, 1) > 0;
 
         if ~isTrackInitialized
@@ -39,14 +55,14 @@ function finalValue = mouseBehaviorAnalysis(filename)
                 isTrackInitialized = true;
             end
 
-            label = 'Initial'; circle = zeros(0,3);
+            circle = zeros(0,3);
 
         else 
             if isObjectDetected 
-             predict(kalmanFilter);
-             trackedLocation = correct(kalmanFilter, detectedLocation(1,:))
+                predict(kalmanFilter);
+                trackedLocation = correct(kalmanFilter, detectedLocation(1,:));
             end
-            circle = [trackedLocation, 5];
+            circle = [trackedLocation 3];
             
             points = trackedLocation;
             if ~isempty(oldPoints)
@@ -54,21 +70,21 @@ function finalValue = mouseBehaviorAnalysis(filename)
                 vel_pix = sqrt(sum((points-oldPoints).^2,2));
                 velocityLabel = vel_pix * frameRate * scale; % pixels/frame * frame/seconds * meter/pixels
                 velocityTotal = [velocityTotal velocityLabel];
-            else
-                vel_pix = 0;
-                vel = 0;
             end
             oldPoints = points;
         end
 
         foregroundMask = im2single(foregroundMask);
         
-        foregroundMask = insertObjectAnnotation(foregroundMask, 'circle', ...
-          circle, cellstr([num2str(velocityLabel) ' cm/sec']), 'Color', 'green');
-      
+        detectedLocationPoint = mean(detectedLocation)
+        if isnan(detectedLocationPoint) ~= [1 1] & numel(detectedLocationPoint) == 2
+            foregroundMask = insertObjectAnnotation(foregroundMask, 'circle', ...
+                [detectedLocationPoint 3], cellstr([num2str(velocityLabel) ' cm/sec']), 'Color', 'green');
+        end
         % ONLY IF YOU WANT TO SEE IT WORKING IN REAL TIME
-        imshowpair(foregroundMask, colorImage, 'blend');
+        imshowpair(foregroundMask, colorImage, 'montage');
         
+        %center-detectedLocationPoint
     end
 
     velocityTotal = velocityTotal(velocityTotal ~= 0);
