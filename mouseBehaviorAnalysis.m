@@ -10,7 +10,7 @@ function finalValue = mouseBehaviorAnalysis(filename)
                     'InitialVariance', 0.05);
     blobAnalyzer = vision.BlobAnalysis('AreaOutputPort', false, ...
                     'MinimumBlobArea', 70);
-
+                
     kalmanFilter = []; isTrackInitialized = false;
     oldPoints = [];
     velocityLabel = 0; velocityTotal = [];
@@ -44,11 +44,7 @@ function finalValue = mouseBehaviorAnalysis(filename)
         else 
             if isObjectDetected 
              predict(kalmanFilter);
-             trackedLocation = correct(kalmanFilter, detectedLocation(1,:));
-             label = 'Corrected';
-            else
-             trackedLocation = predict(kalmanFilter);
-             label = 'Predicted';
+             trackedLocation = correct(kalmanFilter, detectedLocation(1,:))
             end
             circle = [trackedLocation, 5];
             
@@ -71,7 +67,7 @@ function finalValue = mouseBehaviorAnalysis(filename)
           circle, cellstr([num2str(velocityLabel) ' cm/sec']), 'Color', 'green');
       
         % ONLY IF YOU WANT TO SEE IT WORKING IN REAL TIME
-        %imshowpair(foregroundMask, colorImage, 'blend');
+        imshowpair(foregroundMask, colorImage, 'blend');
         
     end
 

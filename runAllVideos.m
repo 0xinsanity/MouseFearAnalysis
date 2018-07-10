@@ -1,12 +1,12 @@
 function runAllVideos()
-   start = 'MouseVideobehaviorAnalysis/';
+   start = '';
    extinction = dir([start 'Video/extinction/*.mov']); 
    recall = dir([start 'Video/recall/*.mov']);
    training = dir([start 'Video/training/*.mov']);
    
-   analyze(extinction, 'extinction');
-   analyze(recall, 'recall');
    analyze(training, 'training');
+   analyze(recall, 'recall');
+   analyze(extinction, 'extinction');
    
 end
 
@@ -15,7 +15,7 @@ function analyze(database, name)
     for i = 1:1:length(database)
         fprintf(fileID, [database(i).name ': ']);
         meanVelocity = mouseBehaviorAnalysis([database(i).folder, '/', database(i).name]);
-        fprintf(fileID, '%f', meanVelocity);
+        fprintf(fileID, '%f\n', meanVelocity);
     end
     fclose(fileID);
 end
