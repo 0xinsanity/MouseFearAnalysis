@@ -4,18 +4,56 @@ function runAllVideos()
    recall = dir([start 'Video/recall/*.mov']);
    training = dir([start 'Video/training/*.mov']);
    
-   analyze(training, 'training');
-   analyze(recall, 'recall');
+   % Training
+   % Tone: 120-150 sec
+   analyze(training, 'training', 'Tone', 120, 150);
+   % Footshock 145-150 sec
+   analyze(training, 'training', 'Footshock', 145, 150);
+   
+   % Recall
+   % Tone 120-150 sec
+   analyze(recall, 'recall', 'Tone1', 120, 150);
+   % Tone 240-270 sec
+   analyze(recall, 'recall', 'Tone2', 240, 270);
+   % Tone 330-360 sec
+   analyze(recall, 'recall', 'Tone3', 330, 360);
+   % Tone 420-450 sec
+   analyze(recall, 'recall', 'Tone4', 420, 450);
+   % Tone 570-600 sec
+   analyze(recall, 'recall', 'Tone5', 570, 600);
+   % Tone 630-660 sec
+   analyze(recall, 'recall', 'Tone6', 630, 660);
+   % Tone 720-750 sec
+   analyze(recall, 'recall', 'Tone7', 720, 750);
+   % Tone 870-900 sec
+   analyze(recall, 'recall', 'Tone8', 870, 900);
+   % Tone 960-990 sec
+   analyze(recall, 'recall', 'Tone9', 960, 990);
+   % Tone 1100-1130 sec
+   analyze(recall, 'recall', 'Tone10', 1100, 1130);
+   
    analyze(extinction, 'extinction');
    
 end
 
-function analyze(database, name)
-    fileID = fopen([name '.txt'],'w');
+function analyze(database, name, type, frame_start, frame_end)
+    % Convert seconds to frames
+    framerate = 3.75;
+    frame_start = frame_start*framerate;
+    frame_end = frame_end*framerate;
+    
+    fileID = fopen([name  '_AVGSPEED' '.txt'],'w');
+    fprintf(fileID, [type ': \n']);
     for i = 1:1:length(database)
         fprintf(fileID, [database(i).name ': ']);
-        meanVelocity = mouseBehaviorAnalysis([database(i).folder, '/', database(i).name], 10, 100);
+        
+        full_name = [database(i).folder, '/', database(i).name];
+        meanVelocity = mouseBehaviorAnalysis(full_name, 0, frame_start, frame_end);
+        
         fprintf(fileID, '%f\n', meanVelocity);
     end
+    
+    fprintf(fileID, '\n');
+    
     fclose(fileID);
 end

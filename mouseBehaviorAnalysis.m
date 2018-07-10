@@ -1,4 +1,4 @@
-function finalValue = mouseBehaviorAnalysis(filename, frame_start, frame_end)
+function finalValue = mouseBehaviorAnalysis(filename, show_work, frame_start, frame_end)
     VideoSize = [210 300];
     
     scale = 1/9.75; % centimeter/pixel
@@ -17,8 +17,8 @@ function finalValue = mouseBehaviorAnalysis(filename, frame_start, frame_end)
     center = [105 150];
     oldPoints = [];
     
-    for i=1:1:frame_start
-        step(videoReader);
+    for i=1:frame_start
+        test = step(videoReader);
     end
     
     for i=frame_start:1:frame_end
@@ -27,8 +27,8 @@ function finalValue = mouseBehaviorAnalysis(filename, frame_start, frame_end)
         colorImage = step(videoReader);
         bw_file = rgb2gray(colorImage);
         
-        background_img = imread('Video/accuratebackground.png'); 
-        background_img = rgb2gray(background_img);
+        %background_img = imread('Video/accuratebackground.png'); 
+        %background_img = rgb2gray(background_img);
 
         % get background approximation of surface (lighting and stuff)
         background = imopen(bw_file,strel('disk',35));
@@ -76,14 +76,16 @@ function finalValue = mouseBehaviorAnalysis(filename, frame_start, frame_end)
 
         foregroundMask = im2single(foregroundMask);
         
-        detectedLocationPoint = mean(detectedLocation)
-        if isnan(detectedLocationPoint) ~= [1 1] & numel(detectedLocationPoint) == 2
-            foregroundMask = insertObjectAnnotation(foregroundMask, 'circle', ...
-                [detectedLocationPoint 3], cellstr([num2str(velocityLabel) ' cm/sec']), 'Color', 'green');
+        if show_work
+            detectedLocationPoint = mean(detectedLocation)
+            if isnan(detectedLocationPoint) ~= [1 1] & numel(detectedLocationPoint) == 2
+                foregroundMask = insertObjectAnnotation(foregroundMask, 'circle', ...
+                    [detectedLocationPoint 3], cellstr([num2str(velocityLabel) ' cm/sec']), 'Color', 'green');
+            end
+            % ONLY IF YOU WANT TO SEE IT WORKING IN REAL TIME
+            imshowpair(foregroundMask, colorImage, 'montage');
         end
-        % ONLY IF YOU WANT TO SEE IT WORKING IN REAL TIME
-        imshowpair(foregroundMask, colorImage, 'montage');
-        
+        % TODO: MEASURE DISTANCE FROM CENTER
         %center-detectedLocationPoint
     end
 
