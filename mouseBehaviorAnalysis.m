@@ -21,7 +21,7 @@ function finalValue = mouseBehaviorAnalysis(filename, show_work, frame_start, fr
         test = step(videoReader);
     end
     
-    dist_from_center = [];
+    dist_from_center = [105 150];
     for i=frame_start:1:frame_end
         detectedLocationPoint = [0 0];
         
@@ -95,9 +95,12 @@ function finalValue = mouseBehaviorAnalysis(filename, show_work, frame_start, fr
 
     velocityTotal = velocityTotal(velocityTotal ~= 0);
     
+    dist_from_center
+    
+    center = center*scale;
     release(videoPlayer);
     meanVelocity = mean(velocityTotal);
-    avg_place = mean(dist_from_center)*scale;
+    avg_place = mean(dist_from_center, 1)*scale;
     final_dist = pdist([avg_place; center])*scale;
     
     finalValue = FinalMetrics;

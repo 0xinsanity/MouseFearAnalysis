@@ -62,7 +62,7 @@ function analyze(database, name, type, frame_start, frame_end)
     frame_start = frame_start*framerate;
     frame_end = frame_end*framerate;
     
-    fileID = fopen(['new data/'  name  '_AVGSPEED' '.txt'],'a');
+    fileID = fopen(['new data/'  name '.txt'],'a');
     fprintf(fileID, [type ': \n']);
     for i = 1:1:length(database)
         fprintf(fileID, [database(i).name ': ']);
@@ -72,7 +72,7 @@ function analyze(database, name, type, frame_start, frame_end)
         
         fprintf(fileID, 'Velocity: %f cm/sec. ', finalMetrics.MeanVelocity);
         fprintf(fileID, 'Distance From Center: %f cm. ', finalMetrics.DistanceCenter);
-        fprintf(fileID, 'Average Placement: %f cm.\n', finalMetrics.AveragePlacement);
+        fprintf(fileID, 'Average Placement: [%f, %f] cm.\n', finalMetrics.AveragePlacement);
     end
     
     fprintf(fileID, '\n');
