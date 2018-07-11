@@ -21,6 +21,7 @@ function finalValue = mouseBehaviorAnalysis(filename, show_work, frame_start, fr
         test = step(videoReader);
     end
     
+    dist_from_center = [];
     for i=frame_start:1:frame_end
         detectedLocationPoint = [0 0];
         
@@ -61,37 +62,46 @@ function finalValue = mouseBehaviorAnalysis(filename, show_work, frame_start, fr
             if isObjectDetected 
                 predict(kalmanFilter);
                 trackedLocation = correct(kalmanFilter, detectedLocation(1,:));
-            end
-            circle = [trackedLocation 3];
-            
-            points = trackedLocation;
-            if ~isempty(oldPoints)
-                % Calculate velocity (pixels/frame)
-                vel_pix = sqrt(sum((points-oldPoints).^2,2));
-                velocityLabel = vel_pix * frameRate * scale; % pixels/frame * frame/seconds * meter/pixels
-                velocityTotal = [velocityTotal velocityLabel];
-            end
-            oldPoints = points;
+                
+                points = trackedLocation;
+                if ~isempty(oldPoints)
+                    % Calculate velocity (pixels/frame)
+                    vel_pix = sqrt(sum((points-oldPoints).^2,2));
+                    velocityLabel = vel_pix * frameRate * scale; % pixels/frame * frame/seconds * meter/pixels
+                    velocityTotal = [velocityTotal velocityLabel];
+                end
+                oldPoints = points;
+                end
+            %circle = [trackedLocation 3];
         end
 
-        foregroundMask = im2single(foregroundMask);
         
+        detectedLocationPoint = mean(detectedLocation);
+        foregroundMask = im2single(foregroundMask);
+            
+        if isnan(detectedLocationPoint) ~= [1 1] & numel(detectedLocationPoint) == 2
+            dist_from_center = [dist_from_center; center-detectedLocationPoint];
+            
+            foregroundMask = insertObjectAnnotation(foregroundMask, 'circle', ...
+                [detectedLocationPoint 3], cellstr([num2str(velocityLabel) ' cm/sec']), 'Color', 'green');
+        end
+            
+        % ONLY IF YOU WANT TO SEE IT WORKING IN REAL TIME  
         if show_work
-            detectedLocationPoint = mean(detectedLocation)
-            if isnan(detectedLocationPoint) ~= [1 1] & numel(detectedLocationPoint) == 2
-                foregroundMask = insertObjectAnnotation(foregroundMask, 'circle', ...
-                    [detectedLocationPoint 3], cellstr([num2str(velocityLabel) ' cm/sec']), 'Color', 'green');
-            end
-            % ONLY IF YOU WANT TO SEE IT WORKING IN REAL TIME
             imshowpair(foregroundMask, colorImage, 'montage');
         end
         % TODO: MEASURE DISTANCE FROM CENTER
-        %center-detectedLocationPoint
     end
 
     velocityTotal = velocityTotal(velocityTotal ~= 0);
     
     release(videoPlayer);
     meanVelocity = mean(velocityTotal);
-    finalValue = meanVelocity;
+    avg_place = mean(dist_from_center)*scale;
+    final_dist = pdist([avg_place; center])*scale;
+    
+    finalValue = FinalMetrics;
+    finalValue.MeanVelocity= meanVelocity;
+    finalValue.AveragePlacement = avg_place;
+    finalValue.DistanceCenter = final_dist;
 end
