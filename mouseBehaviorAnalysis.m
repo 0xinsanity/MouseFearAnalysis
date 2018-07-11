@@ -77,28 +77,36 @@ function finalValue = mouseBehaviorAnalysis(filename, show_work, frame_start, fr
 
         
         detectedLocationPoint = mean(detectedLocation);
-        foregroundMask = im2single(foregroundMask);
             
         if isnan(detectedLocationPoint) ~= [1 1] & numel(detectedLocationPoint) == 2
             dist_from_center = [dist_from_center; center-detectedLocationPoint];
             
-            foregroundMask = insertObjectAnnotation(foregroundMask, 'circle', ...
-                [detectedLocationPoint 3], cellstr([num2str(velocityLabel) ' cm/sec']), 'Color', 'green');
+            %foregroundMask = insertObjectAnnotation(foregroundMask, 'circle', ...
+            %    [detectedLocationPoint 3], cellstr([num2str(velocityLabel) ' cm/sec']), 'Color', 'green');
         end
             
         % ONLY IF YOU WANT TO SEE IT WORKING IN REAL TIME  
         if show_work
+            foregroundMask = im2single(foregroundMask);
+            if ~isempty(detectedLocation)
+                % TODO: Find a way to fill in mouse
+                %foregroundMask = regionfill(foregroundMask, [3 3 3 3], [4 4 4 4]);
+            end
+            
+            for i = 1:size(detectedLocation)
+                foregroundMask = insertObjectAnnotation(foregroundMask, 'circle', ...
+                [detectedLocation(i,:) 3], cellstr(['Point ' num2str(i)]), 'Color', 'green');
+            end
+            
             imshowpair(foregroundMask, colorImage, 'montage');
         end
-        % TODO: MEASURE DISTANCE FROM CENTER
     end
 
     velocityTotal = velocityTotal(velocityTotal ~= 0);
     
-    dist_from_center
+    release(videoPlayer);
     
     center = center*scale;
-    release(videoPlayer);
     meanVelocity = mean(velocityTotal);
     avg_place = mean(dist_from_center, 1)*scale;
     final_dist = pdist([avg_place; center])*scale;
