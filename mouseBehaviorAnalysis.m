@@ -21,29 +21,32 @@ function finalValue = mouseBehaviorAnalysis(filename, show_work, frame_start, fr
         test = step(videoReader);
     end
     
+    figure
     dist_from_center = [105 150];
     for i=frame_start:1:frame_end
         detectedLocationPoint = [0 0];
+        accurateBg = imread('./MouseVideobehaviorAnalysis/trainingNOMOUSE.png');
+        accurateBg = imcrop(accurateBg, [52 15 167 179]);
+        accurateBg = rgb2gray(accurateBg);
+        accurateBg = edge(accurateBg,'canny');
+        accurateBg = bwmorph(accurateBg, 'thick');
         
         colorImage = step(videoReader);
+        colorImage = imcrop(colorImage, [52 15 167 179]);
         bw_file = rgb2gray(colorImage);
         
-        %background_img = imread('Video/accuratebackground.png'); 
-        %background_img = rgb2gray(background_img);
-
-        % get background approximation of surface (lighting and stuff)
-        background = imopen(bw_file,strel('disk',35));
-
-        % Display the Background Approximation as a Surface
-        ax = gca;
-        ax.YDir = 'reverse';
-
-        % Remove Background Approximation
-        bw2 = bw_file - background;
+        % EDGE AND SUBTRACTION
+        %bw_file = imsubtract(im2single(imread('Video/accuratebackground.png')), im2single(colorImage));
+        bw_file = edge(bw_file,'canny');
+        bw_file = (bw_file-accurateBg);
+        %bw_file = setdiff(bw_file,[-1 0 -1]);
+        %bw_file(bw_file == -1) = 0;
+        %bw_file = bwareaopen(bw_file, 5);
+        %bw_file = imfill(bw_file, 'holes');
         
-        foregroundMask = foregroundDetector(bw2);
-        foregroundMask = bwareaopen(foregroundMask, 15);
-        foregroundMask = imfill(foregroundMask, 'holes');
+        foregroundMask = foregroundDetector(im2single(bw_file));
+        %foregroundMask = bwareaopen(foregroundMask, 15);
+        %foregroundMask = imfill(foregroundMask, 'holes');
         
         detectedLocation = step(blobAnalyzer,foregroundMask); % [x,y]
         
@@ -55,8 +58,6 @@ function finalValue = mouseBehaviorAnalysis(filename, show_work, frame_start, fr
                           detectedLocation(1,:), [1 1 1]*1e5, [1, 10, 10], 25);
                 isTrackInitialized = true;
             end
-
-            circle = zeros(0,3);
 
         else 
             if isObjectDetected 
@@ -71,7 +72,7 @@ function finalValue = mouseBehaviorAnalysis(filename, show_work, frame_start, fr
                     velocityTotal = [velocityTotal velocityLabel];
                 end
                 oldPoints = points;
-                end
+            end
             %circle = [trackedLocation 3];
         end
 
@@ -98,7 +99,7 @@ function finalValue = mouseBehaviorAnalysis(filename, show_work, frame_start, fr
                 [detectedLocation(i,:) 3], cellstr(['Point ' num2str(i)]), 'Color', 'green');
             end
             
-            imshowpair(foregroundMask, colorImage, 'montage');
+            imshowpair(im2single(accurateBg), im2single(bw_file), 'montage');
         end
     end
 
