@@ -43,6 +43,7 @@ function finalValue = mouseBehaviorAnalysis(filename, show_work, frame_start, fr
         %bw_file = setdiff(bw_file,[-1 0 -1]);
         bw_file(bw_file == 1) = -1;
         bw_file(bw_file == -1) = 1;
+        bw_file_first = bw_file;
         
         % remove thin lines
         x = bw_file.';
@@ -51,8 +52,21 @@ function finalValue = mouseBehaviorAnalysis(filename, show_work, frame_start, fr
         x(change+1)=0;
         bw_file = x.';
         
-        bw_file = bwareaopen(bw_file, 25);
-        %bw_file = imfill(bw_file, 'holes');
+        bw_file = bwareaopen(bw_file, 10);
+        bw_file = bwmorph(bw_file, 'thick');
+        % Fill in lines
+        x = bw_file.';
+        y=find(x);
+        change=y(diff(y)<=3);
+        x(change+1)=1;
+        x(change+2)=1;
+        x(change+3)=1;
+        bw_file = x.';
+        
+        bw_file = imfill(bw_file, 'holes');
+        bw_file = bwmorph(bw_file, 'thin');
+        bw_file = bwareaopen(bw_file, 200);
+        %bw_file = bwmorph(bw_file, 'thick');
         
         foregroundMask = foregroundDetector(im2single(bw_file));
         foregroundMask = bwareaopen(foregroundMask, 15);
