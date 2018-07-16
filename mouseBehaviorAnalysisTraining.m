@@ -30,7 +30,7 @@ function finalValue = mouseBehaviorAnalysisTraining(filename, show_work, frame_s
     
     figure
     velocityTotal = [];
-    center = [105 150];
+    center = [83.5 89.5];
     dist_from_center = [];
     previous_centroid = []; initialized = 0;
     for i=frame_start:1:frame_end
