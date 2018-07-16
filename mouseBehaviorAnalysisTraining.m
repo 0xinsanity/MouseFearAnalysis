@@ -5,6 +5,7 @@ function finalValue = mouseBehaviorAnalysisTraining(filename, show_work, frame_s
     frameRate = 3.75; % frame/second
 
     videoReader = vision.VideoFileReader(filename);
+    videoReader_averagebg = vision.VideoFileReader(filename);
     videoPlayer = vision.VideoPlayer('Position',[200,200,500,400]);
     %foregroundDetector = vision.ForegroundDetector('NumTrainingFrames', 500, ...
     %                'InitialVariance', 0.05);
@@ -12,23 +13,31 @@ function finalValue = mouseBehaviorAnalysisTraining(filename, show_work, frame_s
     %                'MinimumBlobArea', 70);
                 
     %kalmanFilter = []; isTrackInitialized = false;
-    velocityTotal = [];
-    
-    center = [105 150];
     %oldPoints = [];
+    
+    % Get average background
+    meanImage = double(step(videoReader_averagebg));
+    for i=2:1:100
+        img = step(videoReader_averagebg);
+        meanImage = meanImage + double(img);
+    end
+    meanImage = meanImage / 100;
+    figure, imshow(meanImage);
     
     for i=1:frame_start
         test = step(videoReader);
     end
     
     figure
+    velocityTotal = [];
+    center = [105 150];
     dist_from_center = [105 150];
     previous_centroid = []; initialized = 0;
     for i=frame_start:1:frame_end
         %detectedLocationPoint = [0 0];
         velocityLabel = 0;
         
-        accurateBg = imread('./MouseVideobehaviorAnalysis/trainingNOMOUSE.png');
+        accurateBg = meanImage;
         accurateBg = imcrop(accurateBg, [52 15 167 179]);
         accurateBg = rgb2gray(accurateBg);
         accurateBg = edge(accurateBg,'canny');
