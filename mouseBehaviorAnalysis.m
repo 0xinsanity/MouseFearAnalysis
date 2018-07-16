@@ -38,14 +38,24 @@ function finalValue = mouseBehaviorAnalysis(filename, show_work, frame_start, fr
         % EDGE AND SUBTRACTION
         %bw_file = imsubtract(im2single(imread('Video/accuratebackground.png')), im2single(colorImage));
         bw_file = edge(bw_file,'canny');
-        bw_file = (bw_file-accurateBg);
+        bw_file_first = (bw_file-accurateBg);
+        bw_file = bw_file_first;
         %bw_file = setdiff(bw_file,[-1 0 -1]);
-        %bw_file(bw_file == -1) = 0;
-        %bw_file = bwareaopen(bw_file, 5);
+        bw_file(bw_file == 1) = -1;
+        bw_file(bw_file == -1) = 1;
+        
+        % remove thin lines
+        x = bw_file.';
+        y=find(~x);
+        change=y(diff(y)==2);
+        x(change+1)=0;
+        bw_file = x.';
+        
+        bw_file = bwareaopen(bw_file, 25);
         %bw_file = imfill(bw_file, 'holes');
         
         foregroundMask = foregroundDetector(im2single(bw_file));
-        %foregroundMask = bwareaopen(foregroundMask, 15);
+        foregroundMask = bwareaopen(foregroundMask, 15);
         %foregroundMask = imfill(foregroundMask, 'holes');
         
         detectedLocation = step(blobAnalyzer,foregroundMask); % [x,y]
@@ -99,7 +109,7 @@ function finalValue = mouseBehaviorAnalysis(filename, show_work, frame_start, fr
                 [detectedLocation(i,:) 3], cellstr(['Point ' num2str(i)]), 'Color', 'green');
             end
             
-            imshowpair(im2single(accurateBg), im2single(bw_file), 'montage');
+            imshowpair(im2single(bw_file_first), im2single(bw_file), 'montage');
         end
     end
 
