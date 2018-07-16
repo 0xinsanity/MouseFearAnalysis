@@ -147,10 +147,14 @@ function finalValue = mouseBehaviorAnalysisTraining(filename, show_work, frame_s
                 %foregroundMask = regionfill(foregroundMask, [3 3 3 3], [4 4 4 4]);
             %end
             
+
+            newImage = colorImage;
+            newImage(bw_file == 0) = 0;
+        
             bw_file = insertObjectAnnotation(bw_file, 'circle', ...
             [centroid 3], cellstr([num2str(velocityLabel) ' cm/sec']), 'Color', 'green');
-
-            imshowpair(im2single(colorImage), im2single(bw_file), 'diff');
+        
+            imshowpair(im2single(newImage), im2single(bw_file), 'montage');
         end
     end
 
