@@ -1,4 +1,4 @@
-function finalValue = mouseBehaviorAnalysis(filename, show_work, frame_start, frame_end)
+function finalValue = mouseBehaviorAnalysisTraining(filename, show_work, frame_start, frame_end)
     VideoSize = [210 300];
     
     scale = 1/9.75; % centimeter/pixel
@@ -54,6 +54,7 @@ function finalValue = mouseBehaviorAnalysis(filename, show_work, frame_start, fr
         
         bw_file = bwareaopen(bw_file, 10);
         bw_file = bwmorph(bw_file, 'thick');
+        
         % Fill in lines
         x = bw_file.';
         y=find(x);
@@ -123,7 +124,7 @@ function finalValue = mouseBehaviorAnalysis(filename, show_work, frame_start, fr
                 [detectedLocation(i,:) 3], cellstr(['Point ' num2str(i)]), 'Color', 'green');
             end
             
-            imshowpair(im2single(bw_file_first), im2single(bw_file), 'montage');
+            imshowpair(im2single(foregroundMask), im2single(bw_file), 'montage');
         end
     end
 
