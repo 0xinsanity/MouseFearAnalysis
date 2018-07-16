@@ -31,7 +31,7 @@ function finalValue = mouseBehaviorAnalysisTraining(filename, show_work, frame_s
     figure
     velocityTotal = [];
     center = [105 150];
-    dist_from_center = [105 150];
+    dist_from_center = [];
     previous_centroid = []; initialized = 0;
     for i=frame_start:1:frame_end
         %detectedLocationPoint = [0 0];
@@ -80,6 +80,7 @@ function finalValue = mouseBehaviorAnalysisTraining(filename, show_work, frame_s
         bw_file = bwmorph(bw_file, 'thin');
         bw_file = bwareaopen(bw_file, 200);
         %bw_file = bwmorph(bw_file, 'thick');
+        
         s = regionprops(bw_file,'centroid');
         centroids = cat(1, s.Centroid);
         centroid = centroids(1,:);
@@ -88,11 +89,13 @@ function finalValue = mouseBehaviorAnalysisTraining(filename, show_work, frame_s
             vel_pix = pdist2(centroid, previous_centroid, 'euclidean');
             velocityLabel = vel_pix * frameRate * scale; % pixels/frame * frame/seconds * meter/pixels
             velocityTotal = [velocityTotal velocityLabel];
+            dist_from_center = [dist_from_center; center-centroid];
         else
             initialized = 1;
         end
         
         previous_centroid = centroid;
+        
 %         foregroundMask = foregroundDetector(im2single(bw_file));
 %         foregroundMask = bwareaopen(foregroundMask, 15);
 %         %foregroundMask = imfill(foregroundMask, 'holes');
@@ -147,7 +150,7 @@ function finalValue = mouseBehaviorAnalysisTraining(filename, show_work, frame_s
             bw_file = insertObjectAnnotation(bw_file, 'circle', ...
             [centroid 3], cellstr([num2str(velocityLabel) ' cm/sec']), 'Color', 'green');
 
-            imshowpair(im2single(colorImage), im2single(bw_file), 'montage');
+            imshowpair(im2single(colorImage), im2single(bw_file), 'diff');
         end
     end
 
@@ -155,9 +158,10 @@ function finalValue = mouseBehaviorAnalysisTraining(filename, show_work, frame_s
     
     release(videoPlayer);
     
+    % Calculate Final Metrics and Return Them
     center = center*scale;
     meanVelocity = mean(velocityTotal);
-    avg_place = mean(dist_from_center, 1)*scale;
+    avg_place = mean(dist_from_center)*scale;
     final_dist = pdist([avg_place; center])*scale;
     
     finalValue = FinalMetrics;
