@@ -73,6 +73,7 @@ function analyze(database, name, type, frame_start, frame_end)
         fprintf(fileID, 'Velocity: %f cm/sec. ', finalMetrics.MeanVelocity);
         fprintf(fileID, 'Distance From Center: %f cm. ', finalMetrics.DistanceCenter);
         fprintf(fileID, 'Average Placement: [%f, %f] cm.\n', finalMetrics.AveragePlacement);
+        fprintf(fileID, 'Mean Area: %f cm^2\n', finalMetrics.MeanArea);
     end
     
     fprintf(fileID, '\n');

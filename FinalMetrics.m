@@ -3,5 +3,6 @@ classdef FinalMetrics
         MeanVelocity
         DistanceCenter
         AveragePlacement
+        MeanArea
     end
 end

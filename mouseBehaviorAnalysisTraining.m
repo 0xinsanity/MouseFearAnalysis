@@ -29,7 +29,7 @@ function finalValue = mouseBehaviorAnalysisTraining(filename, show_work, frame_s
     end
     
     figure
-    velocityTotal = [];
+    velocityTotal = []; areaTotal = [];
     center = [83.5 89.5];
     dist_from_center = [];
     previous_centroid = []; initialized = 0;
@@ -82,6 +82,8 @@ function finalValue = mouseBehaviorAnalysisTraining(filename, show_work, frame_s
         %bw_file = bwmorph(bw_file, 'thick');
         
         s = regionprops(bw_file,'centroid');
+        area = regionprops(bw_file, 'Area');
+        areaTotal = [areaTotal area.Area];
         centroids = cat(1, s.Centroid);
         centroid = centroids(1,:);
         
@@ -158,18 +160,20 @@ function finalValue = mouseBehaviorAnalysisTraining(filename, show_work, frame_s
         end
     end
 
-    velocityTotal = velocityTotal(velocityTotal ~= 0);
+    %velocityTotal = velocityTotal(velocityTotal ~= 0);
     
     release(videoPlayer);
     
     % Calculate Final Metrics and Return Them
     center = center*scale;
-    meanVelocity = mean(velocityTotal);
+    mean_velocity = mean(velocityTotal);
+    mean_area = mean(areaTotal)*(scale^2);
     avg_place = mean(dist_from_center)*scale;
     final_dist = pdist([avg_place; center])*scale;
     
     finalValue = FinalMetrics;
-    finalValue.MeanVelocity= meanVelocity;
+    finalValue.MeanVelocity= mean_velocity;
     finalValue.AveragePlacement = avg_place;
     finalValue.DistanceCenter = final_dist;
+    finalValue.MeanArea = mean_area;
 end
