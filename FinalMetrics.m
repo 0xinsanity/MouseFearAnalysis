@@ -4,5 +4,6 @@ classdef FinalMetrics
         DistanceCenter
         AveragePlacement
         MeanArea
+        MovementInPlace
     end
 end

@@ -160,27 +160,29 @@ function finalValue = mouseBehaviorAnalysis(filename, show_work, frame_start, fr
         if show_work
             %foregroundMask = im2single(foregroundMask);
             %if ~isempty(detectedLocation)
-                % TODO: Find a way to fill in mouse
                 %foregroundMask = regionfill(foregroundMask, [3 3 3 3], [4 4 4 4]);
             %end
             
             bw_file = im2single(bw_file);
 
             newImage = colorImage;
-            newImage(bw_file == 0) = 0;
+            %newImage(bw_file == 0) = 0;
+            newImage = bsxfun(@times, newImage, cast(bw_file, 'like', newImage));
+            newImage = rgb2gray(newImage);
         
             bw_file = insertObjectAnnotation(bw_file, 'circle', ...
             [centroid 3], cellstr([num2str(velocityLabel) ' cm/sec']), 'Color', 'green');
         
-            imshowpair(im2single(newImage), im2single(bw_file), 'montage');
+            imshowpair(colorImage, im2single(newImage), 'montage');
         end
     end
 
-    %velocityTotal = velocityTotal(velocityTotal ~= 0);
     
     release(videoPlayer);
     
     % Calculate Final Metrics and Return Them
+    [row col] = size(velocityTotal(velocityTotal <= 3));
+    movementInPlace = col / frameRate;
     center = center*scale;
     mean_velocity = mean(velocityTotal);
     mean_area = mean(areaTotal)*(scale^2);
@@ -192,6 +194,7 @@ function finalValue = mouseBehaviorAnalysis(filename, show_work, frame_start, fr
     finalValue.AveragePlacement = avg_place;
     finalValue.DistanceCenter = final_dist;
     finalValue.MeanArea = mean_area;
+    finalValue.MovementInPlace = movementInPlace;
 end
 
 % Function to return the specified number of largest or smallest blobs in a binary image.
