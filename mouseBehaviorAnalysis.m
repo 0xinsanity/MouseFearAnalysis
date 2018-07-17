@@ -1,5 +1,11 @@
-function finalValue = mouseBehaviorAnalysisTraining(filename, show_work, frame_start, frame_end)
-    %VideoSize = [210 300];
+%
+%   filename=name of video file link
+%   show_work=play the images in figures
+%   frame_start=beginning frame
+%   frame_end=end frame
+%
+function finalValue = mouseBehaviorAnalysis(filename, show_work, frame_start, frame_end)
+    VideoSize = [210 300];
     
     scale = 1/9.75; % centimeter/pixel
     frameRate = 3.75; % frame/second
@@ -22,7 +28,7 @@ function finalValue = mouseBehaviorAnalysisTraining(filename, show_work, frame_s
         meanImage = meanImage + double(img);
     end
     meanImage = meanImage / 100;
-    figure, imshow(meanImage);
+    %figure, imshow(meanImage);
     
     for i=1:frame_start
         test = step(videoReader);
@@ -30,7 +36,7 @@ function finalValue = mouseBehaviorAnalysisTraining(filename, show_work, frame_s
     
     figure
     velocityTotal = []; areaTotal = [];
-    center = [83.5 89.5];
+    center = [105 150];
     dist_from_center = [];
     previous_centroid = []; initialized = 0;
     for i=frame_start:1:frame_end
@@ -38,13 +44,13 @@ function finalValue = mouseBehaviorAnalysisTraining(filename, show_work, frame_s
         velocityLabel = 0;
         
         accurateBg = meanImage;
-        accurateBg = imcrop(accurateBg, [52 15 167 179]);
+        %accurateBg = imcrop(accurateBg, [52 15 167 179]);
         accurateBg = rgb2gray(accurateBg);
         accurateBg = edge(accurateBg,'canny');
         accurateBg = bwmorph(accurateBg, 'thick');
         
         colorImage = step(videoReader);
-        colorImage = imcrop(colorImage, [52 15 167 179]);
+        %colorImage = imcrop(colorImage, [52 15 167 179]);
         bw_file = rgb2gray(colorImage);
         
         % EDGE AND SUBTRACTION
@@ -53,16 +59,24 @@ function finalValue = mouseBehaviorAnalysisTraining(filename, show_work, frame_s
         bw_file_first = (bw_file-accurateBg);
         bw_file = bw_file_first;
         %bw_file = setdiff(bw_file,[-1 0 -1]);
+
         bw_file(bw_file == 1) = -1;
         bw_file(bw_file == -1) = 1;
         bw_file_first = bw_file;
-        
-        % remove thin lines
+
+        % remove horizontal thin lines
         x = bw_file.';
         y=find(~x);
         change=y(diff(y)==2);
         x(change+1)=0;
         bw_file = x.';
+        
+        % remove vertical thin lines for grid
+        x = bw_file;
+        y=find(~x);
+        change=y(diff(y)==2);
+        x(change+1)=0;
+        bw_file = x;
         
         bw_file = bwareaopen(bw_file, 10);
         bw_file = bwmorph(bw_file, 'thick');
@@ -75,11 +89,13 @@ function finalValue = mouseBehaviorAnalysisTraining(filename, show_work, frame_s
         x(change+2)=1;
         x(change+3)=1;
         bw_file = x.';
-        
+
         bw_file = imfill(bw_file, 'holes');
-        bw_file = bwmorph(bw_file, 'thin');
+        
+        %bw_file = bwmorph(bw_file, 'thin');
+        
         bw_file = bwareaopen(bw_file, 200);
-        %bw_file = bwmorph(bw_file, 'thick');
+        bw_file = ExtractNLargestBlobs(bw_file, 1);
         
         s = regionprops(bw_file,'centroid');
         area = regionprops(bw_file, 'Area');
@@ -143,12 +159,12 @@ function finalValue = mouseBehaviorAnalysisTraining(filename, show_work, frame_s
         % ONLY IF YOU WANT TO SEE IT WORKING IN REAL TIME  
         if show_work
             %foregroundMask = im2single(foregroundMask);
-            bw_file = im2single(bw_file);
             %if ~isempty(detectedLocation)
                 % TODO: Find a way to fill in mouse
                 %foregroundMask = regionfill(foregroundMask, [3 3 3 3], [4 4 4 4]);
             %end
             
+            bw_file = im2single(bw_file);
 
             newImage = colorImage;
             newImage(bw_file == 0) = 0;
@@ -176,4 +192,44 @@ function finalValue = mouseBehaviorAnalysisTraining(filename, show_work, frame_s
     finalValue.AveragePlacement = avg_place;
     finalValue.DistanceCenter = final_dist;
     finalValue.MeanArea = mean_area;
+end
+
+% Function to return the specified number of largest or smallest blobs in a binary image.
+% If numberToExtract > 0 it returns the numberToExtract largest blobs.
+% If numberToExtract < 0 it returns the numberToExtract smallest blobs.
+% Example: return a binary image with only the largest blob:
+%   binaryImage = ExtractNLargestBlobs(binaryImage, 1)
+% Example: return a binary image with the 3 smallest blobs:
+%   binaryImage = ExtractNLargestBlobs(binaryImage, -3)
+function binaryImage = ExtractNLargestBlobs(binaryImage, numberToExtract)
+try
+	% Get all the blob properties.  Can only pass in originalImage in version R2008a and later.
+	[labeledImage, numberOfBlobs] = bwlabel(binaryImage);
+	blobMeasurements = regionprops(labeledImage, 'area');
+	% Get all the areas
+	allAreas = [blobMeasurements.Area];
+	if numberToExtract > 0
+		% For positive numbers, sort in order of largest to smallest.
+		% Sort them.
+		[sortedAreas, sortIndexes] = sort(allAreas, 'descend');
+	elseif numberToExtract < 0
+		% For negative numbers, sort in order of smallest to largest.
+		% Sort them.
+		[sortedAreas, sortIndexes] = sort(allAreas, 'ascend');
+		% Need to negate numberToExtract so we can use it in sortIndexes later.
+		numberToExtract = -numberToExtract;
+	else
+		% numberToExtract = 0.  Shouldn't happen.  Return no blobs.
+		binaryImage = false(size(binaryImage));
+		return;
+	end
+	% Extract the "numberToExtract" largest blob(a)s using ismember().
+	biggestBlob = ismember(labeledImage, sortIndexes(1:numberToExtract));
+	% Convert from integer labeled image into binary (logical) image.
+	binaryImage = biggestBlob > 0;
+catch ME
+	errorMessage = sprintf('Error in function ExtractNLargestBlobs().\n\nError Message:\n%s', ME.message);
+	fprintf(1, '%s\n', errorMessage);
+	uiwait(warndlg(errorMessage));
+end
 end
