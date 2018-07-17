@@ -1,9 +1,10 @@
 classdef FinalMetrics
     properties
         MeanVelocity
-        DistanceCenter
+        DistanceFromCenter
         AveragePlacement
         MeanArea
         MovementInPlace
+        TimeOnWall
     end
 end

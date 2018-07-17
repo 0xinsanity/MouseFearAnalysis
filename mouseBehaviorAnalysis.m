@@ -37,7 +37,8 @@ function finalValue = mouseBehaviorAnalysis(filename, show_work, frame_start, fr
     figure
     velocityTotal = []; areaTotal = [];
     center = [105 150];
-    dist_from_center = [];
+    place = [];
+    frames_on_wall = 0;
     previous_centroid = []; initialized = 0;
     for i=frame_start:1:frame_end
         %detectedLocationPoint = [0 0];
@@ -107,7 +108,15 @@ function finalValue = mouseBehaviorAnalysis(filename, show_work, frame_start, fr
             vel_pix = pdist2(centroid, previous_centroid, 'euclidean');
             velocityLabel = vel_pix * frameRate * scale; % pixels/frame * frame/seconds * meter/pixels
             velocityTotal = [velocityTotal velocityLabel];
-            dist_from_center = [dist_from_center; center-centroid];
+            place = [place; centroid];
+            
+            x = centroid(:,1);
+            y = centroid(:,2);
+            
+            % TODO: Configure with all images
+            if ~(x>50 && x<200 && y>25 && y<190)
+                frames_on_wall = frames_on_wall + 1;
+            end
         else
             initialized = 1;
         end
@@ -170,7 +179,7 @@ function finalValue = mouseBehaviorAnalysis(filename, show_work, frame_start, fr
             newImage = bsxfun(@times, newImage, cast(bw_file, 'like', newImage));
             newImage = rgb2gray(newImage);
         
-            bw_file = insertObjectAnnotation(bw_file, 'circle', ...
+            newImage = insertObjectAnnotation(newImage, 'circle', ...
             [centroid 3], cellstr([num2str(velocityLabel) ' cm/sec']), 'Color', 'green');
         
             imshowpair(colorImage, im2single(newImage), 'montage');
@@ -181,20 +190,20 @@ function finalValue = mouseBehaviorAnalysis(filename, show_work, frame_start, fr
     release(videoPlayer);
     
     % Calculate Final Metrics and Return Them
-    [row col] = size(velocityTotal(velocityTotal <= 3));
+    [row, col] = size(velocityTotal(velocityTotal < 3));
     movementInPlace = col / frameRate;
-    center = center*scale;
     mean_velocity = mean(velocityTotal);
     mean_area = mean(areaTotal)*(scale^2);
-    avg_place = mean(dist_from_center)*scale;
+    avg_place = mean(place);
     final_dist = pdist([avg_place; center])*scale;
     
     finalValue = FinalMetrics;
     finalValue.MeanVelocity= mean_velocity;
-    finalValue.AveragePlacement = avg_place;
-    finalValue.DistanceCenter = final_dist;
+    finalValue.AveragePlacement = avg_place*scale;
+    finalValue.DistanceFromCenter = final_dist;
     finalValue.MeanArea = mean_area;
     finalValue.MovementInPlace = movementInPlace;
+    finalValue.TimeOnWall = frames_on_wall / frameRate;
 end
 
 % Function to return the specified number of largest or smallest blobs in a binary image.
