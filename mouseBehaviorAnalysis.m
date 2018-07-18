@@ -189,8 +189,8 @@ function finalValue = mouseBehaviorAnalysis(filename, show_work, frame_start, fr
             newImage = rgb2gray(newImage);
             %newImage = imclose(bwmorph(bwareaopen(edge(rangefilt(newImage),'prewitt'), 10), 'majority'), strel('disk',20));
         
-            %newImage = insertObjectAnnotation(newImage, 'circle', ...
-            %[centroid 3], cellstr([num2str(velocityLabel) ' cm/sec']), 'Color', 'green');
+            newImage = insertObjectAnnotation(newImage, 'circle', ...
+            [centroid 3], cellstr([num2str(velocityLabel) ' cm/sec']), 'Color', 'green');
         
             imshowpair(im2single(colorImage), im2single(newImage), 'montage');
         end
