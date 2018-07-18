@@ -63,7 +63,7 @@ function analyze(database, name, type, frame_start, frame_end)
     frame_end = frame_end*framerate;
     
     %fprintf(fileID, [type ': \n']);
-    printingMatrix = [type, "Velocity (cm/sec)", "Distance From Center (cm)", "Average Placement-X (cm)", "Average Placement-Y (cm)", "Mean Area (cm^2)", "Average Movement in Place (sec^2)", "Time On Wall (sec) - NOT DONE YET"];
+    printingMatrix = [type, "Velocity (cm/sec)", "Distance From Center (cm)", "Average Placement-X (cm)", "Average Placement-Y (cm)", "Mean Area (cm^2)", "Average Movement in Place (sec)", "Time On Wall (sec) - NOT DONE YET"];
     
     for i = 1:1:length(database)
         full_name = [database(i).folder, '/', database(i).name];
