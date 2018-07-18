@@ -46,57 +46,66 @@ function finalValue = mouseBehaviorAnalysis(filename, show_work, frame_start, fr
         
         accurateBg = meanImage;
         %accurateBg = imcrop(accurateBg, [52 15 167 179]);
-        accurateBg = rgb2gray(accurateBg);
+        accurateBg = rangefilt(rgb2gray(accurateBg));
         accurateBg = edge(accurateBg,'canny');
         accurateBg = bwmorph(accurateBg, 'thick');
         
         colorImage = step(videoReader);
         %colorImage = imcrop(colorImage, [52 15 167 179]);
-        bw_file = rgb2gray(colorImage);
+        bw_file = rangefilt(rgb2gray(colorImage));
         
         % EDGE AND SUBTRACTION
         %bw_file = imsubtract(im2single(imread('Video/accuratebackground.png')), im2single(colorImage));
         bw_file = edge(bw_file,'canny');
-        bw_file_first = (bw_file-accurateBg);
+        bw_file_first = imcomplement(bw_file-accurateBg);
         bw_file = bw_file_first;
         %bw_file = setdiff(bw_file,[-1 0 -1]);
 
-        bw_file(bw_file == 1) = -1;
-        bw_file(bw_file == -1) = 1;
-        bw_file_first = bw_file;
+        bw_file(bw_file == 1) = 0;
+        %bw_file(bw_file == -1) = 1;
 
         % remove horizontal thin lines
-        x = bw_file.';
-        y=find(~x);
-        change=y(diff(y)==2);
-        x(change+1)=0;
-        bw_file = x.';
-        
-        % remove vertical thin lines for grid
-        x = bw_file;
-        y=find(~x);
-        change=y(diff(y)==2);
-        x(change+1)=0;
-        bw_file = x;
-        
-        bw_file = bwareaopen(bw_file, 10);
-        bw_file = bwmorph(bw_file, 'thick');
-        
-        % Fill in lines
-        x = bw_file.';
-        y=find(x);
-        change=y(diff(y)<=3);
-        x(change+1)=1;
-        x(change+2)=1;
-        x(change+3)=1;
-        bw_file = x.';
-
-        bw_file = imfill(bw_file, 'holes');
-        
-        %bw_file = bwmorph(bw_file, 'thin');
-        
-        bw_file = bwareaopen(bw_file, 200);
-        bw_file = ExtractNLargestBlobs(bw_file, 1);
+         x = bw_file.';
+         y=find(~x);
+         change=y(diff(y)==2);
+         x(change+1)=0;
+         bw_file = x.';
+%         
+%         % remove vertical thin lines for grid
+         x = bw_file;
+         y=find(~x);
+         change=y(diff(y)==2);
+         x(change+1)=0;
+         bw_file = x;
+        %bw_file_first = bw_file;
+        bw_file = imclose(bw_file,strel('sphere', 4));
+%         
+          %bw_file = bwmorph(bw_file, 'thick');
+          bw_file = imfill(bw_file, 'holes');
+%         
+%         % Fill in lines
+%         x = bw_file.';
+%         y=find(x);
+%         change=y(diff(y)<=3);
+%         x(change+1)=1;
+%         x(change+2)=1;
+%         x(change+3)=1;
+%         bw_file = x.';
+%         
+%         x = bw_file;
+%         y=find(x);
+%         change=y(diff(y)<=2);
+%         x(change+1)=1;
+%         x(change+2)=1;
+%         bw_file = x;
+%         
+% % 
+%          bw_file = imfill(bw_file, 'holes');
+%         
+%         %bw_file = bwmorph(bw_file, 'thin');
+%         
+%         bw_file = bwareaopen(bw_file, 200);
+         bw_file = ExtractNLargestBlobs(bw_file, 1);
         
         s = regionprops(bw_file,'centroid');
         area = regionprops(bw_file, 'Area');
@@ -172,17 +181,18 @@ function finalValue = mouseBehaviorAnalysis(filename, show_work, frame_start, fr
                 %foregroundMask = regionfill(foregroundMask, [3 3 3 3], [4 4 4 4]);
             %end
             
-            bw_file = im2single(bw_file);
+            %bw_file = im2single(bw_file);
 
             newImage = colorImage;
             %newImage(bw_file == 0) = 0;
             newImage = bsxfun(@times, newImage, cast(bw_file, 'like', newImage));
             newImage = rgb2gray(newImage);
+            %newImage = imclose(bwmorph(bwareaopen(edge(rangefilt(newImage),'prewitt'), 10), 'majority'), strel('disk',20));
         
-            newImage = insertObjectAnnotation(newImage, 'circle', ...
-            [centroid 3], cellstr([num2str(velocityLabel) ' cm/sec']), 'Color', 'green');
+            %newImage = insertObjectAnnotation(newImage, 'circle', ...
+            %[centroid 3], cellstr([num2str(velocityLabel) ' cm/sec']), 'Color', 'green');
         
-            imshowpair(colorImage, im2single(newImage), 'montage');
+            imshowpair(im2single(colorImage), im2single(newImage), 'montage');
         end
     end
 
