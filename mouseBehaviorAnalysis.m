@@ -34,7 +34,7 @@ function finalValue = mouseBehaviorAnalysis(filename, show_work, frame_start, fr
         test = step(videoReader);
     end
     
-    figure
+    %figure
     velocityTotal = []; areaTotal = [];
     center = [105 150];
     place = [];
