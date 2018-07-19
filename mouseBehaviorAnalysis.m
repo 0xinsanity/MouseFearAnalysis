@@ -4,7 +4,7 @@
 %   frame_start=beginning frame
 %   frame_end=end frame
 %
-function finalValue = mouseBehaviorAnalysis(filename, show_work, frame_start, frame_end)
+function finalValue = mouseBehaviorAnalysis(filename, show_work, frame_start, frame_end, threshold)
     VideoSize = [210 300];
     
     scale = 1/9.75; % centimeter/pixel
@@ -200,7 +200,7 @@ function finalValue = mouseBehaviorAnalysis(filename, show_work, frame_start, fr
     release(videoPlayer);
     
     % Calculate Final Metrics and Return Them
-    [row, col] = size(velocityTotal(velocityTotal < 3));
+    [row, col] = size(velocityTotal(velocityTotal < threshold));
     movementInPlace = col / frameRate;
     mean_velocity = mean(velocityTotal);
     mean_area = mean(areaTotal)*(scale^2);

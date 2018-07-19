@@ -1,4 +1,4 @@
-function analyze(database, name, type, frame_start, frame_end)
+function analyze(database, name, type, frame_start, frame_end, threshold)
     % Convert seconds to frames
     framerate = 3.75;
     frame_start = frame_start*framerate;
@@ -9,7 +9,7 @@ function analyze(database, name, type, frame_start, frame_end)
     
     for i = 1:1:length(database)
         full_name = [database(i).folder, '/', database(i).name];
-        finalMetrics = mouseBehaviorAnalysis(full_name, 0, frame_start, frame_end);
+        finalMetrics = mouseBehaviorAnalysis(full_name, 0, frame_start, frame_end, threshold);
         
 %         fprintf(fileID, 'Velocity: %f cm/sec. ', finalMetrics.MeanVelocity);
 %         fprintf(fileID, 'Distance From Center: %f cm. ', finalMetrics.DistanceFromCenter);
