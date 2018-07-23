@@ -40,6 +40,9 @@ function finalValue = mouseBehaviorAnalysis(filename, show_work, frame_start, fr
     place = [];
     frames_on_wall = 0;
     previous_centroid = []; initialized = 0;
+    if show_work
+        figure
+    end
     for i=frame_start:1:frame_end
         %detectedLocationPoint = [0 0];
         velocityLabel = 0;
@@ -77,8 +80,8 @@ function finalValue = mouseBehaviorAnalysis(filename, show_work, frame_start, fr
          change=y(diff(y)==2);
          x(change+1)=0;
          bw_file = x;
-        %bw_file_first = bw_file;
-        bw_file = imclose(bw_file,strel('sphere', 4));
+         %bw_file_first = bw_file;
+         bw_file = imclose(bw_file,strel('sphere', 4));
 %         
           %bw_file = bwmorph(bw_file, 'thick');
           bw_file = imfill(bw_file, 'holes');
