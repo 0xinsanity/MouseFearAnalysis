@@ -1,6 +1,6 @@
 function analyze(database, name, type, frame_start, frame_end, threshold)
     % Convert seconds to frames
-    framerate = 3.75;
+    framerate = 4;
     frame_start = frame_start*framerate;
     frame_end = frame_end*framerate;
     

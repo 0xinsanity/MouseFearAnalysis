@@ -8,7 +8,7 @@ function finalValue = mouseBehaviorAnalysis(filename, show_work, frame_start, fr
     VideoSize = [210 300];
     
     scale = 1/9.75; % centimeter/pixel
-    frameRate = 3.75; % frame/second
+    frameRate = 4; % frame/second
 
     videoReader = vision.VideoFileReader(filename);
     videoReader_averagebg = vision.VideoFileReader(filename);
@@ -39,7 +39,7 @@ function finalValue = mouseBehaviorAnalysis(filename, show_work, frame_start, fr
     center = [105 150];
     place = [];
     frames_on_wall = 0;
-    previous_centroid = []; initialized = 0;
+    previous_centroid = []; initialized = 0; previous_screen = 0;
     if show_work
         figure
     end
@@ -118,9 +118,18 @@ function finalValue = mouseBehaviorAnalysis(filename, show_work, frame_start, fr
         
         if initialized
             vel_pix = pdist2(centroid, previous_centroid, 'euclidean');
-            velocityLabel = vel_pix * frameRate * scale; % pixels/frame * frame/seconds * meter/pixels
-            velocityTotal = [velocityTotal velocityLabel];
             place = [place; centroid];
+            
+            subtractedImg = rgb2gray(colorImage-previous_screen);
+            subtractedImg(x<0.1) = 0;
+            subtractedImg = imbinarize(subtractedImg, 0.1);
+            subtractedImg = subtractedImg(:);
+            if ~any(subtractedImg)
+                velocityLabel = 0;
+            else 
+                velocityLabel = vel_pix * frameRate * scale; % pixels/frame * frame/seconds * meter/pixels
+            end
+            velocityTotal = [velocityTotal velocityLabel];
             
             x = centroid(:,1);
             y = centroid(:,2);
@@ -134,6 +143,7 @@ function finalValue = mouseBehaviorAnalysis(filename, show_work, frame_start, fr
         end
         
         previous_centroid = centroid;
+        previous_screen = colorImage;
         
 %         foregroundMask = foregroundDetector(im2single(bw_file));
 %         foregroundMask = bwareaopen(foregroundMask, 15);
@@ -203,7 +213,7 @@ function finalValue = mouseBehaviorAnalysis(filename, show_work, frame_start, fr
     release(videoPlayer);
     
     % Calculate Final Metrics and Return Them
-    [row, col] = size(velocityTotal(velocityTotal < threshold));
+    [row, col] = size(velocityTotal(velocityTotal == 0));
     movementInPlace = col / frameRate;
     mean_velocity = mean(velocityTotal);
     mean_area = mean(areaTotal)*(scale^2);
