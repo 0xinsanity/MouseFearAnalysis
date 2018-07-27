@@ -122,7 +122,7 @@ function finalValue = mouseBehaviorAnalysis(filename, show_work, frame_start, fr
             
             subtractedImg = rgb2gray(colorImage-previous_screen);
             subtractedImg(x<0.1) = 0;
-            subtractedImg = imbinarize(subtractedImg, 0.1);
+            subtractedImg = imbinarize(subtractedImg, threshold);
             subtractedImg = subtractedImg(:);
             if ~any(subtractedImg)
                 velocityLabel = 0;
