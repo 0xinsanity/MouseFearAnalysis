@@ -1,6 +1,6 @@
 % hasHeaders = If you have titles at the top of the csv doc or not
 %
-function runSupervisedAlgorithm(file, hasHeaders)
+function [svmmodel, bayesmodel] = runSupervisedAlgorithm(file, hasHeaders)
     % binary classification - 0=no fear, 1=fear
 
     if hasHeaders
@@ -11,12 +11,13 @@ function runSupervisedAlgorithm(file, hasHeaders)
     values = matrix(:,[1:end-1]);
     last_row = matrix(:,end);
     
-    SVMModel = fitcsvm(values,last_row);
-    ClassTree = fitctree(values,last_row, 'CrossVal','on');
-    view(ClassTree.Trained{1},'Mode','graph')
+    BayesModel = fitcnb(values,last_row);
+    %view(ClassTree.Trained{1},'Mode','graph')
     
+    SVMModel = fitcsvm(values,last_row);
     classOrder = SVMModel.ClassNames;
     sv = SVMModel.SupportVectors;
+    
     figure
     gscatter(values(:,1),values(:,2),last_row)
     hold on
@@ -24,4 +25,6 @@ function runSupervisedAlgorithm(file, hasHeaders)
     legend('No Fear','Fear','Support Vector')
     hold off
     
+    svmmodel = SVMModel;
+    bayesmodel = BayesModel;
 end

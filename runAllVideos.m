@@ -1,8 +1,8 @@
 function runAllVideos()
    %start = '';
    extinction = dir('Video/extinction/*.mov'); 
-   recall = dir('Newer Videos/Prenatal Nic Vids/recall/*.avi');
-   training = dir('Newer Videos/Prenatal Nic Vids/training/*.avi');
+   recall = dir('Newer Videos/Prenatal Nicotine A thru I Vids/recall/*.avi');
+   training = dir('Newer Videos/Prenatal Nicotine A thru I Vids/training/*.avi');
    
 %    % Training
 %    % Tone: 120-150 sec
@@ -58,7 +58,7 @@ function runAllVideos()
     %    analyze(training, 'training-intervals', [num2str(i) '-' num2str(i+30) ' sec'], i, i+30, 0.1);
     %end
     
-    for i=0:30:1020
+    for i=0:30:240
         analyzeForML(recall, 'recall-interval-ML', i, i+30, 0.1);
     end
     
