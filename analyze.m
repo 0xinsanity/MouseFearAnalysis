@@ -5,7 +5,7 @@ function analyze(database, name, type, frame_start, frame_end, threshold)
     frame_end = frame_end*framerate;
     
     %fprintf(fileID, [type ': \n']);
-    printingMatrix = [type, "Velocity (cm/sec)", "Distance From Center (cm)", "Average Placement-X (cm)", "Average Placement-Y (cm)", "Mean Area (cm^2)", "Average Movement in Place (sec)", "Time On Wall (sec) - NOT DONE YET"];
+    printingMatrix = [type, "Velocity (cm/sec)", "Distance From Center (cm)", "Average Placement-X (cm)", "Average Placement-Y (cm)", "Mean Area (cm^2)", "Average Movement in Place (sec)", "Total Distance Traveled (cm)"];
     
     for i = 1:1:length(database)
         full_name = [database(i).folder, '/', database(i).name];
@@ -24,9 +24,9 @@ function analyze(database, name, type, frame_start, frame_end, threshold)
         AveragePlacementY = AveragePlacement(:,2);
         MeanArea = finalMetrics.MeanArea;
         MovementInPlace = finalMetrics.MovementInPlace;
-        TimeOnWall = finalMetrics.TimeOnWall;
+        TotalDistanceTraveled = finalMetrics.TotalDistanceTraveled;
         
-        addMatrix = [string(database(i).name), MeanVelocity, DistanceFromCenter, AveragePlacementX,AveragePlacementY,MeanArea,MovementInPlace,TimeOnWall ];
+        addMatrix = [string(database(i).name), MeanVelocity, DistanceFromCenter, AveragePlacementX,AveragePlacementY,MeanArea,MovementInPlace,TotalDistanceTraveled ];
         printingMatrix = [printingMatrix; addMatrix];
         
      end

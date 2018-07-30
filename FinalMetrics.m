@@ -5,6 +5,6 @@ classdef FinalMetrics
         AveragePlacement
         MeanArea
         MovementInPlace
-        TimeOnWall
+        TotalDistanceTraveled
     end
 end

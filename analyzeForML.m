@@ -1,11 +1,11 @@
-function analyzeForML(database, name, sec_start, sec_end, threshold)
+function analyzeForML(database, name, sec_start, sec_end, threshold, start_tone, end_tone)
     % Convert seconds to frames
     framerate = 4;
     frame_start = sec_start*framerate;
     frame_end = sec_end*framerate;
     
     %fprintf(fileID, [type ': \n']);
-    printingMatrix = ["Velocity (cm/sec)", "Distance From Center (cm)", "Average Placement-X (cm)", "Average Placement-Y (cm)", "Mean Area (cm^2)", "Average Movement in Place (sec)", "Fear/No Fear"];
+    printingMatrix = ["Velocity (cm/sec)", "Distance From Center (cm)", "Average Placement-X (cm)", "Average Placement-Y (cm)", "Mean Area (cm^2)", "Average Movement in Place (sec)", "Total Distance Traveled (cm)", "Fear/No Fear"];
     addMatrix = [];
     for i = 1:1:length(database)
         full_name = [database(i).folder, '/', database(i).name];
@@ -24,16 +24,16 @@ function analyzeForML(database, name, sec_start, sec_end, threshold)
         AveragePlacementY = AveragePlacement(:,2);
         MeanArea = finalMetrics.MeanArea;
         MovementInPlace = finalMetrics.MovementInPlace;
+        TotalDistanceTraveled = finalMetrics.TotalDistanceTraveled;
         
         % Specifically for recall
-        if sec_start >= 120 && sec_end <= 180
+        if sec_start >= start_tone && sec_end <= end_tone
             FearNoFear = 1;
         else 
             FearNoFear = 0;
         end
-        FearNoFear;
         
-        addMatrix = [addMatrix; MeanVelocity, DistanceFromCenter, AveragePlacementX,AveragePlacementY,MeanArea,MovementInPlace, FearNoFear];
+        addMatrix = [addMatrix; MeanVelocity, DistanceFromCenter, AveragePlacementX,AveragePlacementY,MeanArea,MovementInPlace,TotalDistanceTraveled, FearNoFear];
         
     end
     

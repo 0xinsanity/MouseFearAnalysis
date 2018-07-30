@@ -39,7 +39,7 @@ function finalValue = mouseBehaviorAnalysis(filename, show_work, frame_start, fr
     center = [105 150];
     place = [];
     frames_on_wall = 0;
-    previous_centroid = []; initialized = 0; previous_screen = 0;
+    previous_centroid = []; initialized = 0; previous_screen = 0; total_dist = 0;
     if show_work
         figure
     end
@@ -127,9 +127,10 @@ function finalValue = mouseBehaviorAnalysis(filename, show_work, frame_start, fr
             if ~any(subtractedImg)
                 velocityLabel = 0;
             else 
-                velocityLabel = vel_pix * frameRate * scale; % pixels/frame * frame/seconds * meter/pixels
+                velocityLabel = vel_pix * frameRate * scale; % pixels/frame * frame/seconds * centimeter/pixels
             end
             velocityTotal = [velocityTotal velocityLabel];
+            total_dist = total_dist + vel_pix;
             
             x = centroid(:,1);
             y = centroid(:,2);
@@ -226,7 +227,7 @@ function finalValue = mouseBehaviorAnalysis(filename, show_work, frame_start, fr
     finalValue.DistanceFromCenter = final_dist;
     finalValue.MeanArea = mean_area;
     finalValue.MovementInPlace = movementInPlace;
-    finalValue.TimeOnWall = frames_on_wall / frameRate;
+    finalValue.TotalDistanceTraveled = total_dist*scale;
 end
 
 % Function to return the specified number of largest or smallest blobs in a binary image.

@@ -1,7 +1,7 @@
 function runAllVideos()
    %start = '';
    extinction = dir('Video/extinction/*.mov'); 
-   recall = dir('Newer Videos/Prenatal Nicotine A thru I Vids/recall/*.avi');
+   recall = dir('Video/recall/*.mov');
    training = dir('Newer Videos/Prenatal Nicotine A thru I Vids/training/*.avi');
    
 %    % Training
@@ -59,7 +59,22 @@ function runAllVideos()
     %end
     
     for i=0:30:240
-        analyzeForML(recall, 'recall-interval-ML', i, i+30, 0.1);
+        analyzeForML(recall, 'recall-interval-OG', i, i+30, 0.1, 120, 180);
+    end
+    for i=240:30:300
+        analyzeForML(recall, 'recall-interval-OG2', i, i+30, 0.1, 240, 300);
+    end
+    for i=300:30:420
+        analyzeForML(recall, 'recall-interval-OG3', i, i+30, 0.1, 330, 390);
+    end
+    for i=420:30:570
+        analyzeForML(recall, 'recall-interval-OG4', i, i+30, 0.1, 420, 480);
+    end
+    for i=570:30:720
+        analyzeForML(recall, 'recall-interval-OG5', i, i+30, 0.1, 570, 690);
+    end
+    for i=690:30:870
+        analyzeForML(recall, 'recall-interval-OG6', i, i+30, 0.1, 720, 780);
     end
     
 %     for i=0:30:990

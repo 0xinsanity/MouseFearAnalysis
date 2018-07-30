@@ -25,6 +25,13 @@ function [svmmodel, bayesmodel] = runSupervisedAlgorithm(file, hasHeaders)
     legend('No Fear','Fear','Support Vector')
     hold off
     
+    features = fscnca(values,last_row);
+    figure
+    plot(features.FeatureWeights, 'ro')
+    grid on
+    xlabel('Feature Index')
+    ylabel('Feature Weight')
+    
     svmmodel = SVMModel;
     bayesmodel = BayesModel;
 end
