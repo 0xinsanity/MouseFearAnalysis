@@ -23,11 +23,12 @@ function finalValue = mouseBehaviorAnalysis(filename, show_work, frame_start, fr
     
     % Get average background
     meanImage = double(step(videoReader_averagebg));
-    for i=2:1:100
+    for i=2:1:200
         img = step(videoReader_averagebg);
         meanImage = meanImage + double(img);
     end
-    meanImage = meanImage / 100;
+    meanImage = meanImage / 200;
+    %figure, imshow(meanImage);
     %figure, imshow(meanImage);
     
     for i=1:frame_start
@@ -60,8 +61,9 @@ function finalValue = mouseBehaviorAnalysis(filename, show_work, frame_start, fr
         % EDGE AND SUBTRACTION
         %bw_file = imsubtract(im2single(imread('Video/accuratebackground.png')), im2single(colorImage));
         bw_file = edge(bw_file,'canny');
-        bw_file_first = imcomplement(bw_file-accurateBg);
-        bw_file = bw_file_first;
+        bw_file_first = bw_file-accurateBg;
+        
+        bw_file = imcomplement(bw_file_first);
         %bw_file = setdiff(bw_file,[-1 0 -1]);
 
         bw_file(bw_file == 1) = 0;
@@ -81,10 +83,12 @@ function finalValue = mouseBehaviorAnalysis(filename, show_work, frame_start, fr
          x(change+1)=0;
          bw_file = x;
          %bw_file_first = bw_file;
+         %figure, imshow(bw_file);
          bw_file = imclose(bw_file,strel('sphere', 4));
 %         
           %bw_file = bwmorph(bw_file, 'thick');
           bw_file = imfill(bw_file, 'holes');
+            %figure, imshow(bw_file);
 %         
 %         % Fill in lines
 %         x = bw_file.';
@@ -109,7 +113,8 @@ function finalValue = mouseBehaviorAnalysis(filename, show_work, frame_start, fr
 %         
 %         bw_file = bwareaopen(bw_file, 200);
          bw_file = ExtractNLargestBlobs(bw_file, 1);
-        
+        %figure, imshow(bw_file)
+         
         s = regionprops(bw_file,'centroid');
         area = regionprops(bw_file, 'Area');
         areaTotal = [areaTotal area.Area];

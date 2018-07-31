@@ -34,4 +34,11 @@ function [svmmodel, bayesmodel] = runSupervisedAlgorithm(file, hasHeaders)
     
     svmmodel = SVMModel;
     bayesmodel = BayesModel;
+    
+    loss(svmmodel,values,last_row)
+    loss(bayesmodel,values,last_row)
+    
+    predict(svmmodel, values)
+    predict(bayesmodel, values)
+    
 end
